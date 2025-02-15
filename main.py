@@ -12,7 +12,9 @@ import os
 from datetime import datetime
 from image import image_router
 from cropplan import cropplan_router
-from chatbot import chatbot_router
+from c1 import chatbot_router
+from weather import weather_router
+from agri_pdf_plan2 import report_router
 
 app = FastAPI()
 
@@ -35,6 +37,8 @@ app.add_middleware(
 app.include_router(image_router, prefix="/image", tags=["Image"])
 app.include_router(cropplan_router, prefix="/cropplan", tags=["Cropplan"])
 app.include_router(chatbot_router, prefix="/chatbot", tags=["Chatbot"])
+app.include_router(weather_router, prefix="/weather", tags=["Weather"])
+app.include_router(report_router, prefix="/report", tags=["Report"])
 
 # Run FastAPI
 if __name__ == "__main__":

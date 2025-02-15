@@ -11,6 +11,8 @@ import uvicorn
 import os
 from datetime import datetime
 from fastapi import FastAPI, APIRouter
+from cure_disease import disease_cures
+import json
 
 image_router = APIRouter()
 
@@ -43,6 +45,33 @@ def preprocess_image(image_path):
     print(input_arr.shape)
     print("here6")
     return input_arr
+
+# #To get cure of plant disease
+# def get_cure_info(disease_name):
+#     disease = disease_cures.get(disease_name)
+#     if disease:
+#         cure_info = f"{disease['cure']}"
+#         if disease['insecticides']:
+#             cure_info += "\nRecommended products:\n- " + "\n- ".join(disease['insecticides'])
+#         return cure_info
+#     else:
+#         return "No cure information available for this disease."
+        
+def get_cure_info(disease_name):
+    disease = disease_cures.get(disease_name)
+    if disease:
+        info = {}
+        # Add Symptoms
+        if 'symptoms' in disease and disease['symptoms']:
+            info["symptoms"] = disease['symptoms']
+        # Add Cure
+        info["cure"] = disease['cure']
+        # Add Insecticides if applicable
+        if disease['insecticides']:
+            info["recommended_products"] = disease['insecticides']
+        return json.dumps(info, indent=4)
+    else:
+        return json.dumps({"error": "No information available for this disease."}, indent=4)
 
 # API endpoint to predict disease
 @image_router.post("/")
@@ -120,7 +149,9 @@ async def predict(file: UploadFile = File(...)):
         model_prediction = class_name[result_index]
         print("model_prediction:",model_prediction)
 
+        info = get_cure_info(model_prediction)
+
         # return JSONResponse(content={"prediction": int(predicted_class)})
-        return JSONResponse(content={"prediction": model_prediction})
+        return JSONResponse(content={"prediction": model_prediction, "info": info})
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
